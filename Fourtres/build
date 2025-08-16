@@ -1,13 +1,28 @@
 #!/bin/bash
 
 TARGET="fourtres.py"
-ASSETS="logo.png json.stores"
+ASSETS="logo.png stores.json"
 INCLUDE=""
 
+BUILD_DIR="fourtres.build"
+BUILD_DIST="fourtres.dist"
+
 for items in $ASSETS; do
-  INCLUDE="$INCLUDE --include-data-files=$items"
+  INCLUDE="$INCLUDE --include-data-files=$items=$items"
 done
 
-# echo $INCLUDE
+# Cleanup before compiling
+echo Preparing dist folder
+if [-z $BUILD_DIST]; then
+  rm - rf $BUILD_DIST
+else
+  echo $BUILD_DIST not found, proceed
+fi
+
 # Compile the file
-python -m nuitka --standalone $INCLUDES $TARGET 
+python -m nuitka --standalone --enable-plugin=tk-inter $INCLUDE $TARGET 
+
+# Cleanup build files
+echo Cleanup build files
+mv $BUILD_DIST "dist"
+rm -rf $BUILD_DIR
