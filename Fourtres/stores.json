@@ -3,9 +3,23 @@
     {
       "dummy@gmail.com": {
         "pw": "+tn*68U+$+24!JnnJ53("
-      },
+      }
+    },
+    {
       "abcd@gmail.com": {
         "pw": "abcdefg"
+      }
+    },
+    {
+      "test": {
+        "pw": "222"
+      }
+    }
+  ],
+  "newsite": [
+    {
+      "test": {
+        "pw": "!to%$1LE(7%m1oN2**P#"
       }
     }
   ]

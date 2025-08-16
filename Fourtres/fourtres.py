@@ -104,7 +104,10 @@ def savePWData():
         return
 
     # convert to json data
-    curData = ""
+    curIndex = curData = ""
+    currentRecord = {}
+    isUpdateRecord = False
+    msgSuccess = f"User record for {website} added to store file."
     data = {
         website: [{
             user: {
@@ -123,18 +126,48 @@ def savePWData():
     except JSONDecodeError:
         curData = data
     else:
-        curData.update(data)
+        # curData.update(data)
+        # TODO - if a website record already exists, ADD the user/email and its pw to that list instead
+        # TODO - if a website already HAS that user/email, PROMPT before replacing the record
+        # check if the user is already in the website records and either overwrite or add
+        if len(STORED_DATA) > 0 and website in STORED_DATA:
+            siteRecords = [data for data in STORED_DATA[website] if website in STORED_DATA]
+            if len(siteRecords) > 0:
+                for record in siteRecords:
+                    if user in record:
+                        curIndex = siteRecords.index(record)
+                        currentRecord = record
+                        isUpdateRecord = True
+                        break
+                # we found the user's record in the site, now we update and rewrite the full path in curData
+                if user in currentRecord:
+                    data = { "pw": newpw}
+                    curData[website][curIndex][user].update(data)
+                # we have a new user for the site, just add it as a new record
+                else:
+                    data = {
+                        user: {
+                            "pw": newpw
+                        }
+                    }
+                    curData[website].append(data)
+        else:
+            curData.update(data)
 
-    # TODO - if a website record already exists, ADD the user/email and its pw to that list instead
-    # TODO - if a website already HAS that user/email, PROMPT before replacing the record
-    # record updated contents
+    # Prompt user before replacing record if it's a record update
+    if isUpdateRecord:
+        if not messagebox.askokcancel(f"Update website record for {user}", f"A User {user} already exists in {website}, overwrite this record?"):
+            return
+        else:
+            msgSuccess = f"{user}'s record for {website} updated successfully."
+
     try:
         with open(STOREFILE, mode="w") as file:
              json.dump(curData, file, indent=2)
     except FileNotFoundError:
         messagebox.showerror("Error Saving Data", "Unable to find store file: " + STOREFILE)
     else:
-        messagebox.showinfo("New Record Added", f"Password entry for {website} added to store file.")
+        messagebox.showinfo("New Record Added", msgSuccess)
     finally:
         tbNewPw.delete(0,tkinter.END)
         tbWebsite.delete(0, tkinter.END)
@@ -158,18 +191,19 @@ def searchPWData():
         messagebox.showerror("Search Error", "No Website Provided")
         return
     try:
-        user_data = [ data for data in STORED_DATA[website] if website in STORED_DATA ]
+        siteRecord = [ data for data in STORED_DATA[website] if website in STORED_DATA ]
     except KeyError:
         messagebox.showerror("Search Error", f"No Users recorded for website: {website}")
         CUR_USER_DATA = []
     else:
-        if len(user_data) > 0:
+        if len(siteRecord) > 0:
             # for items in user_data:
-            for user in user_data[0]:
-                username = user
-                userlist.append(username)
-                pw = user_data[0][user]["pw"]
-                CUR_USER_DATA.append({ "user": user, "pw": pw })
+            for record in siteRecord:
+                user_data = record.keys()
+                for username in user_data:
+                    userlist.append(username)
+                    pw = record[username]["pw"]
+                    CUR_USER_DATA.append({ "user": username, "pw": pw })
 
     finally:
         listUsers["values"] = tuple(userlist)
