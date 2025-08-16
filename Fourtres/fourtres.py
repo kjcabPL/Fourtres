@@ -25,6 +25,8 @@ canvasbgGen = "#FFF088"
 startColor = (255, 0, 0)
 endColor = (255, 240, 136)
 incs = ( int((endColor[0] - startColor[0]) / GEN_MAX_CTR), int((endColor[1] - startColor[1]) / GEN_MAX_CTR), int((endColor[2] - startColor[2]) / GEN_MAX_CTR))
+placeholderWS = "my.site.com"
+placeholderUser = "my_user / dummy@testmail.com"
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def genPassword():
@@ -167,11 +169,6 @@ def searchPWData():
                 username = user
                 userlist.append(username)
                 pw = user_data[0][user]["pw"]
-
-                tbUser.delete(0,tkinter.END)
-                tbUser.insert(0, username)
-                tbNewPw.delete(0,tkinter.END)
-                tbNewPw.insert(0, pw)
                 CUR_USER_DATA.append({ "user": user, "pw": pw })
 
     finally:
@@ -180,7 +177,9 @@ def searchPWData():
         if len(userlist) > 0:
             listUsers.set(userlist[0])
 
-# ---------------------------- UI SETUP ------------------------------- #
+
+# ---------------------------- UI FUNCTIONS ------------------------------- #
+
 def closeWindow():
     global IS_OPEN
     if messagebox.askokcancel("Exit", "Exit Fourtres?"):
@@ -195,6 +194,37 @@ def disableButtons(state = True):
     btGenPW["state"] = val
     btAdd["state"] = val
     btSearch["state"] = val
+
+# When the searchbox is changed to a different user
+def displayPWData(event):
+    global CUR_USER_DATA
+    curUser = listUsers.get()
+    data = [ item["pw"] for item in CUR_USER_DATA if item["user"] == curUser ]
+    print(data)
+
+    if len(data) > 0:
+        tbUser.delete(0, tkinter.END)
+        tbUser.insert(0, curUser)
+        tbNewPw.delete(0, tkinter.END)
+        tbNewPw.insert(0, data[0])
+
+def entryFocused(event):
+    component = event.widget
+    textItem = component.get()
+    if textItem == placeholderUser or textItem == placeholderWS:
+        component.delete(0, tkinter.END)
+
+def entryLeaveFocus(event):
+    component = event.widget
+    textItem = component.get()
+    if textItem == "":
+        if component == tbWebsite:
+            tbWebsite.insert(0, placeholderWS)
+        elif component == tbUser:
+            tbUser.insert(0, placeholderUser)
+
+
+# ---------------------------- UI SETUP ------------------------------- #
 
 window = Tk()
 window.config(padx=25, pady=25)
@@ -215,9 +245,10 @@ lblNewPW = Label(text="New Password:", width = 15)
 
 # Entry Fields
 tbWebsite = Entry(width = 57)
-tbWebsite.focus()
+tbWebsite.insert(0, placeholderWS)
+# tbWebsite.focus()
 tbUser = Entry(width = 57)
-tbUser.insert(0,"dummy@gmail.com")
+tbUser.insert(0, placeholderUser)
 tbNewPw = Entry(width = 33)
 
 # buttons & other comps
@@ -233,6 +264,15 @@ window.protocol("WM_DELETE_WINDOW", closeWindow)
 btGenPW["command"] = genPassword
 btAdd["command"] = savePWData
 btSearch["command"] = searchPWData
+
+# event binding assignments
+listUsers.bind("<<ComboboxSelected>>", displayPWData)
+tbUser.bind("<FocusIn>", entryFocused)
+tbUser.bind("<FocusOut>", entryLeaveFocus)
+tbWebsite.bind("<FocusIn>", entryFocused)
+tbWebsite.bind("<FocusOut>", entryLeaveFocus)
+
+
 
 # arrangements
 canvas.grid(row = 1, column = 1)
