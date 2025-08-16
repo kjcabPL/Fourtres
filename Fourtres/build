@@ -6,6 +6,7 @@ INCLUDE=""
 
 BUILD_DIR="fourtres.build"
 BUILD_DIST="fourtres.dist"
+DISTRO="dist"
 
 for items in $ASSETS; do
   INCLUDE="$INCLUDE --include-data-files=$items=$items"
@@ -13,10 +14,15 @@ done
 
 # Cleanup before compiling
 echo Preparing dist folder
-if [-z $BUILD_DIST]; then
-  rm - rf $BUILD_DIST
-else
+if [ -z $BUILD_DIST ]; then
   echo $BUILD_DIST not found, proceed
+else
+  rm -rf $BUILD_DIST
+fi
+if [ -z $DISTRO ]; then
+  echo $DISTRO not found, proceed
+else
+  rm -rf $DISTRO
 fi
 
 # Compile the file
@@ -24,5 +30,5 @@ python -m nuitka --standalone --enable-plugin=tk-inter $INCLUDE $TARGET
 
 # Cleanup build files
 echo Cleanup build files
-mv $BUILD_DIST "dist"
+mv $BUILD_DIST $DISTRO
 rm -rf $BUILD_DIR
