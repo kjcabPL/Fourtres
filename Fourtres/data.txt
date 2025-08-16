@@ -1,0 +1,5 @@
+asd | dummy@gmail.com | 100 
+asd site | dummy@gmail.com | 100 
+dummy.com | dummy@gmail.com | mytestpassword 
+testpass | dummy@gmail.com | E&DQ3I$)4&!!7j1igQSh 
+test.com | dummy@gmail.com | !J11w7o*5xz$M*!#300$ 
