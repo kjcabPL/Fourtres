@@ -2,7 +2,6 @@ import tkinter
 from json import JSONDecodeError
 from tkinter.ttk import Combobox
 
-import pyperclip
 import json
 from tkinter import *
 from tkinter import messagebox
@@ -58,7 +57,6 @@ def doGenAnimation(CTR):
             window.after(10, doGenAnimation, CTR)
         else:
             GEN_CALC = False
-            pyperclip.copy(tbNewPw.get())
             disableButtons(False)
             canvas.config(bg=canvasbgGen)
 

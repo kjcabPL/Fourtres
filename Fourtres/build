@@ -1,0 +1,13 @@
+#!/bin/bash
+
+TARGET="fourtres.py"
+ASSETS="logo.png json.stores"
+INCLUDE=""
+
+for items in $ASSETS; do
+  INCLUDE="$INCLUDE --include-data-files=$items"
+done
+
+# echo $INCLUDE
+# Compile the file
+python -m nuitka --standalone $INCLUDES $TARGET 
