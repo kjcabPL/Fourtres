@@ -23,7 +23,7 @@ PW_LENGTH = 20
 CUR_BG = ""
 canvasbgStart = "#FF0000"
 canvasbgGen = "#FFF088"
-pwGenSources = { "Random Characters": 0, "Word Set": 1}
+pwGenSources = { "Random Characters": 0, "Pass Phrase": 1}
 curGenSource = pwGenSources["Random Characters"]
 startColor = (255, 0, 0)
 endColor = (255, 240, 136)
@@ -31,6 +31,8 @@ incs = ( int((endColor[0] - startColor[0]) / GEN_MAX_CTR), int((endColor[1] - st
 placeholderWS = "my.site.com"
 placeholderUser = "my_user / dummy@testmail.com"
 
+# Misc Variables
+subgrpGenSettings = [ ]
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def genPassword():
@@ -138,9 +140,6 @@ def savePWData():
     except JSONDecodeError:
         curData = data
     else:
-        # curData.update(data)
-        # TODO - if a website record already exists, ADD the user/email and its pw to that list instead
-        # TODO - if a website already HAS that user/email, PROMPT before replacing the record
         # check if the user is already in the website records and either overwrite or add
         if len(STORED_DATA) > 0 and website in STORED_DATA:
             siteRecords = [data for data in STORED_DATA[website] if website in STORED_DATA]
@@ -258,7 +257,9 @@ def changePWGenSource(event):
     global curGenSource
     val = listGenSource.get()
     curGenSource = pwGenSources[val]
-    print(curGenSource)
+    for frame in subgrpGenSettings:
+        frame.grid_remove()
+    subgrpGenSettings[curGenSource].grid(row=1, column=0, columnspan=3)
 
 def entryFocused(event):
     component = event.widget
@@ -275,6 +276,8 @@ def entryLeaveFocus(event):
         elif component == tbUser:
             tbUser.insert(0, placeholderUser)
 
+def validateNumberEntries(val):
+    return val.isdigit()
 
 # ---------------------------- UI & WINDOW SETUP ------------------------------- #
 
@@ -294,12 +297,20 @@ canvas.create_image(100, 100, image=lock_img )
 groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
 groupGens = LabelFrame(text = "Password Generation", padx = 10, pady = 10)
 groupRecords = LabelFrame(text = "Record Search", padx = 10, pady = 10)
+subgrpGenRandom = LabelFrame(groupGens, text = "Character Settings", width = 60, padx = 5, pady = 10)
+subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", padx = 5, pady = 5)
+subgrpGenPhrase = LabelFrame(groupGens, text = "Passphrase Settings", padx = 5, pady = 10)
+subgrpGenSettings = [ subgrpGenRandom, subgrpGenPhrase ]
 
 # labels
 lblWebsite = Label(groupMain, text="Website:", width = 15 )
 lblUser = Label(groupMain, text="Email/Username:", width = 15)
 lblNewPW = Label(groupMain, text="New Password:", width = 15)
 lblGenSource = Label(groupGens, text="Generate Using: ", width = 15)
+lblGenCharSet = Label(subgrpGenRandom, text="Include Characters: ", width = 15)
+lblGenLength = Label(subgrpGenRandom, text="Password Length: ", width = 15)
+lblGenCount = Label(subgrpGenPhrase, text=" Word Count: ", width = 15)
+lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List", width = 16)
 
 # Entry Fields
 tbWebsite = Entry(groupMain, width = 50)
@@ -307,16 +318,27 @@ tbWebsite.insert(0, placeholderWS)
 tbUser = Entry(groupMain, width = 50)
 tbUser.insert(0, placeholderUser)
 tbNewPw = Entry(groupMain, width = 50)
+tbWordToAdd = Entry(subgrpGenPhrase, width = 20)
 
 # buttons & other components
 btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
 btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
 btSearch = Button(groupRecords, text = "Search For Website Records", width = 29, pady = 5)
+btAddWord = Button(subgrpGenPhrase, text = "Add To Word List", width = 20)
+btWordList = Button(subgrpGenPhrase, text = "Open Word List", width = 55, pady = 3)
 
 listGenSource = Combobox(groupGens, values=[val for val in pwGenSources.keys()], state = "readonly", width = 50 )
 listGenSource.set("Random Characters")
 listUsers = Combobox(groupRecords, values=[], width = 30, height = 10, state = "readonly")
 listUsers.set("")
+
+charSettings = {"hasLetters": BooleanVar(value=True), "hasNumbers": BooleanVar(value=True), "hasSymbols": BooleanVar(value=True)}
+cbChars = Checkbutton(subgrpGenCBs, text="Letters", variable=charSettings["hasLetters"])
+cbNumbers = Checkbutton(subgrpGenCBs, text="Numbers", variable=charSettings["hasNumbers"])
+cbSymbols = Checkbutton(subgrpGenCBs, text="Symbols", variable=charSettings["hasSymbols"])
+
+sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = "readonly", validatecommand = validateNumberEntries)
+sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 44, state = "readonly", validatecommand = validateNumberEntries)
 
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
@@ -349,12 +371,29 @@ btAdd.grid(row = 3, column = 0, columnspan = 3, pady = 5)
 groupGens.grid(row = 3, column = 0, columnspan = 3)
 lblGenSource.grid(row = 0, column = 0)
 listGenSource.grid(row = 0, column = 1, columnspan = 2)
-btGenPW.grid(row = 1, column = 0, columnspan = 3, pady = 5)
+subgrpGenRandom.grid(row = 1, column = 0, columnspan = 3, padx = 5)
+lblGenCharSet.grid(row = 0, column = 0)
+subgrpGenCBs.grid(row = 0, column = 1, columnspan = 2, padx = 23)
+cbChars.grid(row = 0, column = 0, padx=5)
+cbNumbers.grid(row = 0, column = 1, padx=5)
+cbSymbols.grid(row = 0, column = 2, padx=5)
+lblGenLength.grid(row = 1, column = 0)
+sbCharLength.grid(row = 1, column = 1, columnspan = 2, pady = 3)
+subgrpGenPhrase.grid(row = 1, column = 0, columnspan = 3)
+lblGenPhrases.grid(row = 0, column = 0)
+tbWordToAdd.grid(row = 0, column = 1)
+btAddWord.grid(row = 0, column = 2, padx = 5, pady = 5)
+lblGenCount.grid(row = 1, column = 0)
+sbWordCount.grid(row = 1, column = 1, columnspan = 2, pady = 5)
+btWordList.grid(row = 2, column = 0, columnspan = 3)
+btGenPW.grid(row = 2, column = 0, columnspan = 3, pady = 5)
 
 groupRecords.grid(row = 4, column = 0, columnspan = 3)
 btSearch.grid(row = 0, column = 0, columnspan = 2, padx = 5)
 listUsers.grid(row = 0, column = 2, padx = 5)
 
+# hide by default at app start
+subgrpGenPhrase.grid_remove()
 # ---------------------------- MAIN LOOP ------------------------------- #
 
 # window loop
