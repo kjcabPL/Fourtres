@@ -4,6 +4,7 @@ from tkinter.ttk import Combobox
 
 import pyperclip
 import json
+from math import ceil
 from tkinter import *
 from tkinter import messagebox
 from random import randint, choice, shuffle
@@ -77,16 +78,44 @@ def genRandomizedHash():
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
 
-    # Separate the password length to letter, number and symbol variance
-    maxChars = PW_LENGTH
-    nr_letters = randint(int(maxChars / 4), int(maxChars / 2))
-    maxChars -= nr_letters
-    nr_numbers = randint(int(maxChars / 3), int(maxChars / 2))
-    maxChars -= nr_numbers
-    nr_symbols = maxChars
+    # Get password length and character settings. return with an error if none of the checkboxes are enabled
+    PW_LENGTH = int(sbCharLength.get())
+    hasLetters = charSettings["hasLetters"].get()
+    hasNumbers = charSettings["hasNumbers"].get()
+    hasSymbols = charSettings["hasSymbols"].get()
+
+    if not hasLetters and not hasNumbers and not hasSymbols:
+        messagebox.showerror("Password Generation Error", "You must select at least one character setting for password generation")
+        return
+
+    # Separate letter, number and symbol counts
+    charCount = numCount = symCount = 0
+    lengthRatio = 1
+    if hasLetters or hasNumbers or hasSymbols:
+        if hasLetters and hasNumbers:
+            lengthRatio += 1
+            if hasSymbols:
+                lengthRatio += 1
+        elif hasLetters and hasSymbols:
+            lengthRatio += 1
+            if hasNumbers:
+                lengthRatio += 1
+        elif hasSymbols and hasNumbers:
+            lengthRatio += 1
+            if hasLetters:
+                lengthRatio += 1
+
+    if hasLetters: charCount = ceil(PW_LENGTH / lengthRatio)
+    if hasNumbers: numCount = ceil(PW_LENGTH / lengthRatio)
+    if hasSymbols: symCount = ceil(PW_LENGTH / lengthRatio)
 
     # Generate a new password from combined list comprehension arithmetic
-    newPass = [choice(letters) for _ in range(0, nr_letters)] + [choice(numbers) for _ in range(0, nr_numbers)] + [choice(symbols) for _ in range(0, nr_symbols)]
+    newPass = [choice(letters) for _ in range(0, charCount)] + [choice(numbers) for _ in range(0, numCount)] + [choice(symbols) for _ in range(0, symCount)]
+    # In case the length of the result is higher than the password length
+    if len(newPass) > PW_LENGTH:
+        extra = len(newPass) - PW_LENGTH
+        newPass = newPass[:-extra]
+
     shuffle(newPass)
     newPass = "".join(newPass)
     return newPass
