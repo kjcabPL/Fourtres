@@ -12,8 +12,9 @@ IS_OPEN = True
 GEN_PW = ""
 GEN_MAX_CTR = 100
 GEN_CALC = False
-# STOREFILE = "data.txt"
+
 STOREFILE = "stores.json"
+WORDFILE = "ws.json"
 STORED_DATA = {}
 CUR_USER_DATA = []
 PW_LENGTH = 20
@@ -22,11 +23,14 @@ PW_LENGTH = 20
 CUR_BG = ""
 canvasbgStart = "#FF0000"
 canvasbgGen = "#FFF088"
+pwGenSources = { "Random Characters": 0, "Word Set": 1}
+curGenSource = pwGenSources["Random Characters"]
 startColor = (255, 0, 0)
 endColor = (255, 240, 136)
 incs = ( int((endColor[0] - startColor[0]) / GEN_MAX_CTR), int((endColor[1] - startColor[1]) / GEN_MAX_CTR), int((endColor[2] - startColor[2]) / GEN_MAX_CTR))
 placeholderWS = "my.site.com"
 placeholderUser = "my_user / dummy@testmail.com"
+
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def genPassword():
@@ -89,6 +93,10 @@ def genRandomizedHash():
 # ---------------------------- PASSWORD FUNCTIONS ------------------------------- #
 def writeNewStoreFile():
     with open(STOREFILE, mode="w") as file:
+        file.write("")
+
+def writeNewWordsetFile():
+    with open(WORDFILE, mode="w") as file:
         file.write("")
 
 def savePWData():
@@ -246,6 +254,12 @@ def displayPWData(event):
         tbNewPw.delete(0, tkinter.END)
         tbNewPw.insert(0, data[0])
 
+def changePWGenSource(event):
+    global curGenSource
+    val = listGenSource.get()
+    curGenSource = pwGenSources[val]
+    print(curGenSource)
+
 def entryFocused(event):
     component = event.widget
     textItem = component.get()
@@ -285,6 +299,7 @@ groupRecords = LabelFrame(text = "Record Search", padx = 10, pady = 10)
 lblWebsite = Label(groupMain, text="Website:", width = 15 )
 lblUser = Label(groupMain, text="Email/Username:", width = 15)
 lblNewPW = Label(groupMain, text="New Password:", width = 15)
+lblGenSource = Label(groupGens, text="Generate Using: ", width = 15)
 
 # Entry Fields
 tbWebsite = Entry(groupMain, width = 50)
@@ -296,11 +311,12 @@ tbNewPw = Entry(groupMain, width = 50)
 # buttons & other components
 btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
 btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
-btSearch = Button(groupRecords, text = "Search For Website Records", width = 40, pady = 5)
+btSearch = Button(groupRecords, text = "Search For Website Records", width = 29, pady = 5)
 
-listUsers = Combobox(groupRecords, values=[], width = 16, height = 10)
+listGenSource = Combobox(groupGens, values=[val for val in pwGenSources.keys()], state = "readonly", width = 50 )
+listGenSource.set("Random Characters")
+listUsers = Combobox(groupRecords, values=[], width = 30, height = 10, state = "readonly")
 listUsers.set("")
-
 
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
@@ -312,6 +328,7 @@ btSearch["command"] = searchPWData
 
 # event binding assignments
 listUsers.bind("<<ComboboxSelected>>", displayPWData)
+listGenSource.bind("<<ComboboxSelected>>", changePWGenSource)
 tbUser.bind("<FocusIn>", entryFocused)
 tbUser.bind("<FocusOut>", entryLeaveFocus)
 tbWebsite.bind("<FocusIn>", entryFocused)
@@ -330,7 +347,9 @@ tbNewPw.grid(row = 2, column = 1, columnspan = 2)
 btAdd.grid(row = 3, column = 0, columnspan = 3, pady = 5)
 
 groupGens.grid(row = 3, column = 0, columnspan = 3)
-btGenPW.grid(row = 0, column = 1)
+lblGenSource.grid(row = 0, column = 0)
+listGenSource.grid(row = 0, column = 1, columnspan = 2)
+btGenPW.grid(row = 1, column = 0, columnspan = 3, pady = 5)
 
 groupRecords.grid(row = 4, column = 0, columnspan = 3)
 btSearch.grid(row = 0, column = 0, columnspan = 2, padx = 5)
