@@ -64,7 +64,7 @@ def doGenAnimation(CTR):
             CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
             bgColor = f"#{CUR_BG[0]:02X}{CUR_BG[1]:02X}{CUR_BG[2]:02X}"
             canvas.config(bg=bgColor)
-            window.after(10, doGenAnimation, CTR)
+            main.after(10, doGenAnimation, CTR)
         else:
             GEN_CALC = False
             pyperclip.copy(tbNewPw.get())
@@ -116,7 +116,7 @@ def genRandomizedHash():
         extra = len(newPass) - PW_LENGTH
         newPass = newPass[:-extra]
 
-    shuffle(newPass)
+    # shuffle(newPass)
     newPass = "".join(newPass)
     return newPass
 
@@ -258,7 +258,7 @@ def closeWindow():
     global IS_OPEN
     if messagebox.askokcancel("Exit", "Exit Fourtres?"):
         IS_OPEN = False
-        window.destroy()
+        main.destroy()
 
 def disableButtons(state = True):
     val = tkinter.DISABLED
@@ -268,6 +268,49 @@ def disableButtons(state = True):
     btGenPW["state"] = val
     btAdd["state"] = val
     btSearch["state"] = val
+
+def openWordList():
+    modalWordlist = tkinter.Toplevel(main)
+    modalWordlist.title("Passphrase set")
+    modalWordlist.grab_set()
+    modalWordlist.config(padx = 10, pady = 10)
+
+    # make this window modal and disabled main window unless closed
+    modalWordlist.transient(main)
+
+    # get the position of the main window based on its location and dimensions
+    main.update_idletasks()
+    x = main.winfo_x()
+    y = main.winfo_y()
+    w = main.winfo_width()
+    h = main.winfo_height()
+
+    # Reposition modal using its window width and height and using geometry()
+    mWidth = modalWordlist.winfo_width()
+    mHeight = modalWordlist.winfo_height()
+    posx = x + ( w // 2 ) - ( mWidth // 2 )
+    posy = y + ( h // 2 ) - ( mHeight // 2 )
+
+    geoString = f"{mWidth}x{mHeight}+{posx}+{posy}"
+    modalWordlist.geometry(geoString)
+
+    # TODO Check for word list file and grab array from it
+    wordlist = ["test1", "test2", "test3"]
+
+    # Add components to the modal
+    btRemoveWord = Button(modalWordlist, text = "Remove Word", width = 20, pady = 3)
+    lbWordlist = Listbox(modalWordlist, height = 8, width = 30)
+    lbWordlist.focus()
+
+    # insert word list into wordlist list box
+    if len(wordlist) > 0:
+        for item in wordlist:
+            lbWordlist.insert(wordlist.index(item), item)
+
+    # position the components
+    lbWordlist.grid(row = 0, column = 0, pady = 5)
+    btRemoveWord.grid(row = 1, column = 0, pady = 5)
+
 
 # When the searchbox is changed to a different user
 def displayPWData(event):
@@ -310,12 +353,13 @@ def validateNumberEntries(val):
 
 # ---------------------------- UI & WINDOW SETUP ------------------------------- #
 
-window = Tk()
-window.config(padx=25, pady=25)
-window.title("Fourtres Password Builder")
-window.resizable(False, False)
+main = Tk()
+main.config(padx=25, pady=25)
+main.title("Fourtres Password Builder")
+main.resizable(False, False)
+
 readPWData()
-canvasbg = window["bg"]
+canvasbg = main["bg"]
 
 lock_img = PhotoImage(file="logo.png")
 canvas = Canvas(width=200, height=200)
@@ -372,10 +416,11 @@ sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 44, state = "
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
 # function assignments
-window.protocol("WM_DELETE_WINDOW", closeWindow)
+main.protocol("WM_DELETE_WINDOW", closeWindow)
 btGenPW["command"] = genPassword
 btAdd["command"] = savePWData
 btSearch["command"] = searchPWData
+btWordList["command"] = openWordList
 
 # event binding assignments
 listUsers.bind("<<ComboboxSelected>>", displayPWData)
@@ -427,4 +472,4 @@ subgrpGenPhrase.grid_remove()
 
 # window loop
 while IS_OPEN:
-    window.mainloop()
+    main.mainloop()
