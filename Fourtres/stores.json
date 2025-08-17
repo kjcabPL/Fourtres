@@ -22,5 +22,12 @@
         "pw": "!to%$1LE(7%m1oN2**P#"
       }
     }
+  ],
+  "my.site.com": [
+    {
+      "my_user / dummy@testmail.com": {
+        "pw": ""
+      }
+    }
   ]
 }

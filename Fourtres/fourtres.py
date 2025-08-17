@@ -97,11 +97,15 @@ def savePWData():
     user = tbUser.get()
 
     if website == "":
-        messagebox.showerror("Error Saving Data", "Website should not be empty")
+        messagebox.showerror("Error Saving Record", "Website should not be empty")
         return
     elif user == "":
-        messagebox.showerror("Error Saving Data", "Username should not be empty")
+        messagebox.showerror("Error Saving Record", "Username should not be empty")
         return
+    elif newpw == "":
+        if not messagebox.askokcancel("Saving Record", "Password field is empty. Are you sue you want to continue?"):
+            tbNewPw.focus()
+            return
 
     # convert to json data
     curIndex = curData = ""
@@ -258,7 +262,7 @@ def entryLeaveFocus(event):
             tbUser.insert(0, placeholderUser)
 
 
-# ---------------------------- UI SETUP ------------------------------- #
+# ---------------------------- UI & WINDOW SETUP ------------------------------- #
 
 window = Tk()
 window.config(padx=25, pady=25)
@@ -272,26 +276,33 @@ canvas = Canvas(width=200, height=200)
 canvas.config(bg=canvasbg)
 canvas.create_image(100, 100, image=lock_img )
 
+# Panels and component groupings
+groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
+groupGens = LabelFrame(text = "Password Generation", padx = 10, pady = 10)
+groupRecords = LabelFrame(text = "Record Search", padx = 10, pady = 10)
+
 # labels
-lblWebsite = Label(text="Website:", width = 15 )
-lblUser = Label(text="Email/Username:", width = 15)
-lblNewPW = Label(text="New Password:", width = 15)
+lblWebsite = Label(groupMain, text="Website:", width = 15 )
+lblUser = Label(groupMain, text="Email/Username:", width = 15)
+lblNewPW = Label(groupMain, text="New Password:", width = 15)
 
 # Entry Fields
-tbWebsite = Entry(width = 57)
+tbWebsite = Entry(groupMain, width = 50)
 tbWebsite.insert(0, placeholderWS)
-# tbWebsite.focus()
-tbUser = Entry(width = 57)
+tbUser = Entry(groupMain, width = 50)
 tbUser.insert(0, placeholderUser)
-tbNewPw = Entry(width = 33)
+tbNewPw = Entry(groupMain, width = 50)
 
-# buttons & other comps
-btGenPW = Button(text = "Generate Password", width = 19)
-btAdd = Button(text = "Add Record", width = 48)
-btSearch = Button(text = "Search Website Records", width = 28)
+# buttons & other components
+btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
+btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
+btSearch = Button(groupRecords, text = "Search For Website Records", width = 40, pady = 5)
 
-listUsers = Combobox(values=[])
+listUsers = Combobox(groupRecords, values=[], width = 16, height = 10)
 listUsers.set("")
+
+
+# ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
 # function assignments
 window.protocol("WM_DELETE_WINDOW", closeWindow)
@@ -306,20 +317,26 @@ tbUser.bind("<FocusOut>", entryLeaveFocus)
 tbWebsite.bind("<FocusIn>", entryFocused)
 tbWebsite.bind("<FocusOut>", entryLeaveFocus)
 
-
-
 # arrangements
-canvas.grid(row = 1, column = 1)
-lblWebsite.grid(row = 2, column = 0)
-tbWebsite.grid(row = 2, column = 1, columnspan = 2)
-lblUser.grid(row = 3, column = 0)
-tbUser.grid(row = 3, column = 1, columnspan = 2)
-lblNewPW.grid(row = 4, column = 0)
-tbNewPw.grid(row = 4, column = 1)
-btGenPW.grid(row = 4, column = 2)
-btAdd.grid(row = 5, column = 1, columnspan = 2)
-btSearch.grid(row = 6, column = 1)
-listUsers.grid(row = 6, column = 2)
+canvas.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
+
+groupMain.grid(row = 2, column = 0, columnspan = 3)
+lblWebsite.grid(row = 0, column = 0)
+lblUser.grid(row = 1, column = 0)
+tbWebsite.grid(row = 0, column = 1, columnspan = 2)
+tbUser.grid(row = 1, column = 1, columnspan = 2)
+lblNewPW.grid(row = 2, column = 0)
+tbNewPw.grid(row = 2, column = 1, columnspan = 2)
+btAdd.grid(row = 3, column = 0, columnspan = 3, pady = 5)
+
+groupGens.grid(row = 3, column = 0, columnspan = 3)
+btGenPW.grid(row = 0, column = 1)
+
+groupRecords.grid(row = 4, column = 0, columnspan = 3)
+btSearch.grid(row = 0, column = 0, columnspan = 2, padx = 5)
+listUsers.grid(row = 0, column = 2, padx = 5)
+
+# ---------------------------- MAIN LOOP ------------------------------- #
 
 # window loop
 while IS_OPEN:
