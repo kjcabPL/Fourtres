@@ -18,6 +18,8 @@ STOREFILE = "stores.json"
 WORDFILE = "ws.json"
 STORED_DATA = {}
 CUR_USER_DATA = []
+CUR_WORD_LIST = []
+CUR_WORD_LENGTH = 2
 PW_LENGTH = 20
 
 # Variables for Color Manipulation during PW generation
@@ -37,17 +39,48 @@ subgrpGenSettings = [ ]
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def genPassword():
-    global GEN_PW
     global GEN_CALC
     global CUR_BG
 
     GEN_CALC = True
-    GEN_CUR_CTR = 0
     CUR_BG = startColor
-    doGenAnimation(GEN_CUR_CTR)
-    tbNewPw.insert(0, str(GEN_PW))
+
+    if curGenSource == 0: generateFromCharacters()
+    elif curGenSource == 1: generateFromWordList()
+
+def generateFromCharacters():
+    global GEN_PW
+
+    GEN_CUR_CTR = 0
     disableButtons()
     canvas.config(bg=canvasbgStart)
+    doGenAnimation(GEN_CUR_CTR)
+    tbNewPw.insert(0, str(GEN_PW))
+
+def generateFromWordList():
+    global GEN_PW
+    global CUR_WORD_LIST
+    global CUR_WORD_LENGTH
+
+    try:
+        with open(WORDFILE, "r") as file:
+            data = json.load(file)
+            curWordList = data["words"]
+    except FileNotFoundError:
+        messagebox.showerror("Password Generation Error", "Cannot find word list file")
+        return
+
+    if len(curWordList) == 0:
+        messagebox.showerror("Password Generation Error", "Cannot generate passphrase from empty word list")
+        return
+
+    CUR_WORD_LIST = curWordList
+    CUR_WORD_LENGTH = int(sbWordCount.get())
+    GEN_CUR_CTR = 0
+    disableButtons()
+    canvas.config(bg=canvasbgStart)
+    doGenAnimation(GEN_CUR_CTR)
+    tbNewPw.insert(0, str(GEN_PW))
 
 def doGenAnimation(CTR):
     global GEN_PW
@@ -58,7 +91,8 @@ def doGenAnimation(CTR):
         if CTR < GEN_MAX_CTR:
             CTR += 1
             GEN_PW = CTR
-            newPass = genRandomizedHash()
+            if curGenSource == 0: newPass = genRandomizedHash()
+            elif curGenSource == 1: newPass = genRandomizedPhrase()
             tbNewPw.delete(0, tkinter.END)
             tbNewPw.insert(0, newPass)
             CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
@@ -118,6 +152,18 @@ def genRandomizedHash():
 
     # shuffle(newPass)
     newPass = "".join(newPass)
+    return newPass
+
+def genRandomizedPhrase():
+    global CUR_WORD_LIST
+
+    wordLength = CUR_WORD_LENGTH
+    tempPass = ""
+
+    for i in range(0, wordLength):
+        tempPass += choice(CUR_WORD_LIST)
+
+    newPass = tempPass
     return newPass
 
 
@@ -205,7 +251,7 @@ def savePWData():
         with open(STOREFILE, mode="w") as file:
              json.dump(curData, file, indent=2)
     except FileNotFoundError:
-        messagebox.showerror("Error Saving Data", "Unable to find store file: " + STOREFILE)
+        messagebox.showerror("Error Saving Data", "Unable to find store file. ")
     else:
         messagebox.showinfo("New Record Added", msgSuccess)
     finally:
@@ -271,7 +317,7 @@ def disableButtons(state = True):
 
 def openWordList():
     modalWordlist = tkinter.Toplevel(main)
-    modalWordlist.title("Passphrase set")
+    modalWordlist.title("Word Generation Set")
     modalWordlist.grab_set()
     modalWordlist.config(padx = 10, pady = 10)
 
@@ -290,12 +336,19 @@ def openWordList():
     mHeight = modalWordlist.winfo_height()
     posx = x + ( w // 2 ) - ( mWidth // 2 )
     posy = y + ( h // 2 ) - ( mHeight // 2 )
-
     geoString = f"{mWidth}x{mHeight}+{posx}+{posy}"
     modalWordlist.geometry(geoString)
 
     # TODO Check for word list file and grab array from it
-    wordlist = ["test1", "test2", "test3"]
+    wordlist = []
+
+    try:
+        with open(WORDFILE, "r") as file:
+            data = json.load(file)
+            wordlist = data["words"]
+    except FileNotFoundError:
+        with open(WORDFILE, "w") as file:
+            file.write("")
 
     # Add components to the modal
     btRemoveWord = Button(modalWordlist, text = "Remove Word", width = 20, pady = 3)
@@ -311,14 +364,49 @@ def openWordList():
     lbWordlist.grid(row = 0, column = 0, pady = 5)
     btRemoveWord.grid(row = 1, column = 0, pady = 5)
 
+def addToWordList():
+    newWord = tbWordToAdd.get()
+    curWordList = []
+    data = { "words": [] }
+
+    def showWordListError(title, message):
+        messagebox.showerror("Error adding to word list", message)
+        btWordList.focus()
+
+    if newWord == "":
+        showWordListError("Error adding to word list", f"Word to be added cannot be an empty string")
+        return
+
+    try:
+        with open(WORDFILE, "r") as file:
+            data = json.load(file)
+            curWordList = data["words"]
+    except FileNotFoundError:
+        with open(WORDFILE, "w") as file:
+            file.write("")
+
+    # check if the new word is already in the wordlist to prevent redundancy
+    if newWord in curWordList:
+        showWordListError("Error adding to word list", f"{newWord} already in the word list.")
+        return
+
+    curWordList.append(newWord)
+    data = { "words": curWordList }
+    try:
+        with open(WORDFILE, "w") as file:
+            json.dump(data, file, indent=2)
+    except FileNotFoundError:
+        showWordListError("Error Saving Data", "Unable to find word file. ")
+        return
+    else:
+        messagebox.showinfo("Added to Word List", f"{newWord} added to word list")
+
 
 # When the searchbox is changed to a different user
 def displayPWData(event):
     global CUR_USER_DATA
     curUser = listUsers.get()
     data = [ item["pw"] for item in CUR_USER_DATA if item["user"] == curUser ]
-    print(data)
-
     if len(data) > 0:
         tbUser.delete(0, tkinter.END)
         tbUser.insert(0, curUser)
@@ -396,7 +484,7 @@ tbWordToAdd = Entry(subgrpGenPhrase, width = 20)
 # buttons & other components
 btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
 btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
-btSearch = Button(groupRecords, text = "Search For Website Records", width = 29, pady = 5)
+btSearch = Button(groupRecords, text = "Search For Website Records 🔎", width = 29, pady = 5)
 btAddWord = Button(subgrpGenPhrase, text = "Add To Word List", width = 20)
 btWordList = Button(subgrpGenPhrase, text = "Open Word List", width = 55, pady = 3)
 
@@ -420,7 +508,9 @@ main.protocol("WM_DELETE_WINDOW", closeWindow)
 btGenPW["command"] = genPassword
 btAdd["command"] = savePWData
 btSearch["command"] = searchPWData
+btAddWord["command"] = addToWordList
 btWordList["command"] = openWordList
+
 
 # event binding assignments
 listUsers.bind("<<ComboboxSelected>>", displayPWData)
