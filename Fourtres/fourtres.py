@@ -16,8 +16,8 @@ GEN_PW = ""
 GEN_MAX_CTR = 100
 GEN_CALC = False
 
-STOREFILE = "stores.json"
-WORDFILE = "ws.json"
+STOREFILE = "./str/stores.json"
+WORDFILE = "./str/ws.json"
 STORED_DATA = {}
 CUR_USER_DATA = []
 CUR_WORD_LIST = []
@@ -476,7 +476,7 @@ main.resizable(False, False)
 readPWData()
 canvasbg = main["bg"]
 
-lock_img = PhotoImage(file="logo.png")
+lock_img = PhotoImage(file="./img/logo.png")
 canvas = Canvas(width=200, height=200)
 canvas.config(bg=canvasbg)
 canvas.create_image(100, 100, image=lock_img )
@@ -484,22 +484,22 @@ canvas.create_image(100, 100, image=lock_img )
 # Panels and component groupings
 groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
 groupGens = LabelFrame(text = "Password Generation", padx = 10, pady = 10)
-subgrpGenRandom = LabelFrame(groupGens, text = "Character Settings", width = 60, padx = 5, pady = 10)
-subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", padx = 5, pady = 5)
-subgrpGenPhrase = LabelFrame(groupGens, text = "Passphrase Settings", padx = 5, pady = 10)
+subgrpGenRandom = LabelFrame(groupGens, text = "", width = 60, borderwidth = 0, highlightthickness = 0, padx = 5, pady = 10)
+subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", borderwidth = 0, highlightthickness = 0, padx = 5, pady = 5)
+subgrpGenPhrase = LabelFrame(groupGens, text = "", borderwidth = 0, highlightthickness = 0, padx = 3, pady = 10)
 subgrpGenSettings = [ subgrpGenRandom, subgrpGenPhrase ]
-subgrpGenSeparators = LabelFrame(subgrpGenPhrase, text = "", padx = 5)
+subgrpGenSeparators = LabelFrame(subgrpGenPhrase, text = "", borderwidth = 0, highlightthickness = 0, padx = 5)
 
 # labels
-lblWebsite = Label(groupMain, text="Website:", width = 15 )
-lblUser = Label(groupMain, text="Email/Username:", width = 15)
-lblNewPW = Label(groupMain, text="New Password:", width = 15)
-lblGenSource = Label(groupGens, text="Generate Using: ", width = 15)
-lblGenCharSet = Label(subgrpGenRandom, text="Include Characters: ", width = 15)
-lblGenLength = Label(subgrpGenRandom, text="Password Length: ", width = 15)
-lblGenCount = Label(subgrpGenPhrase, text=" Word Count: ", width = 15)
-lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List:", width = 16)
-lblGenSeps = Label(subgrpGenPhrase, text="Separate Words Using:")
+lblWebsite = Label(groupMain, text="Website:", width = 15, anchor="e" )
+lblUser = Label(groupMain, text="Email/Username:", width = 15, anchor="e")
+lblNewPW = Label(groupMain, text="New Password:", width = 15, anchor="e")
+lblGenSource = Label(groupGens, text="Generate Using: ", width = 15, anchor="e")
+lblGenCharSet = Label(subgrpGenRandom, text="Include Characters: ", width = 15, anchor="e")
+lblGenLength = Label(subgrpGenRandom, text="Password Length: ", width = 15, anchor="e")
+lblGenCount = Label(subgrpGenPhrase, text=" Word Count: ", width = 16, anchor="e")
+lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List:", width = 16, anchor="e")
+lblGenSeps = Label(subgrpGenPhrase, text="Word Separators:", width = 16, anchor="e")
 
 # copyright label
 year = str(datetime.now().year)
@@ -511,16 +511,16 @@ tbWebsite.insert(0, placeholderWS)
 tbUser = Combobox(groupMain, values=[], width = 47, height = 10)
 tbUser.insert(0, placeholderUser)
 tbNewPw = Entry(groupMain, width = 50)
-tbWordToAdd = Entry(subgrpGenPhrase, width = 20)
+tbWordToAdd = Entry(subgrpGenPhrase, width = 15)
 
 # buttons & other components
 btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
 btSearch = Button(groupMain, text = "Search Website 🔎", width = 17)
 btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
-btAddWord = Button(subgrpGenPhrase, text = "Add To Word List", width = 20)
-btWordList = Button(subgrpGenPhrase, text = "Open Word List", width = 55, pady = 3)
+btAddWord = Button(subgrpGenPhrase, text = "Add To Word List", width = 15)
+btWordList = Button(subgrpGenPhrase, text = "Open Word List", width = 50, pady = 3)
 
-listGenSource = Combobox(groupGens, values=[val for val in pwGenSources.keys()], state = "readonly", width = 50 )
+listGenSource = Combobox(groupGens, values=[val for val in pwGenSources.keys()], state = "readonly", width = 43 )
 listGenSource.set("Random Characters")
 
 charSettings = {"hasLetters": BooleanVar(value=True), "hasNumbers": BooleanVar(value=True), "hasSymbols": BooleanVar(value=True)}
@@ -538,7 +538,7 @@ cbSep5 = Checkbutton(subgrpGenSeparators, text="%", variable=wordSeparators["%"]
 cbSep6 = Checkbutton(subgrpGenSeparators, text="^", variable=wordSeparators["^"])
 
 sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = "readonly", validatecommand = validateNumberEntries)
-sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 44, state = "readonly", validatecommand = validateNumberEntries)
+sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 38, state = "readonly", validatecommand = validateNumberEntries)
 
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
@@ -572,8 +572,8 @@ tbNewPw.grid(row = 2, column = 1, columnspan = 2, pady = 5)
 btAdd.grid(row = 3, column = 0, columnspan = 3, pady = 5)
 
 groupGens.grid(row = 3, column = 0, columnspan = 3)
-lblGenSource.grid(row = 0, column = 0)
-listGenSource.grid(row = 0, column = 1, columnspan = 2)
+lblGenSource.grid(row = 0, column = 0, padx = 2)
+listGenSource.grid(row = 0, column = 1, columnspan = 2, padx = 15)
 subgrpGenRandom.grid(row = 1, column = 0, columnspan = 3, padx = 5)
 lblGenCharSet.grid(row = 0, column = 0)
 subgrpGenCBs.grid(row = 0, column = 1, columnspan = 2, padx = 23)
@@ -584,18 +584,18 @@ lblGenLength.grid(row = 1, column = 0)
 sbCharLength.grid(row = 1, column = 1, columnspan = 2, pady = 3)
 subgrpGenPhrase.grid(row = 1, column = 0, columnspan = 3)
 lblGenPhrases.grid(row = 0, column = 0)
-tbWordToAdd.grid(row = 0, column = 1)
-btAddWord.grid(row = 0, column = 2, padx = 5, pady = 5)
-lblGenCount.grid(row = 1, column = 0)
+tbWordToAdd.grid(row = 0, column = 1, padx = (0, 3))
+btAddWord.grid(row = 0, column = 2, padx = (5,0), pady = 5)
+lblGenCount.grid(row = 1, column = 0, padx = (5,0))
 sbWordCount.grid(row = 1, column = 1, columnspan = 2, pady = 5)
-lblGenSeps.grid(row = 2, column = 0, pady = 5)
+lblGenSeps.grid(row = 2, column = 0, padx = (5,0), pady = 2)
 subgrpGenSeparators.grid(row = 2, column = 1, columnspan = 2, pady = 5)
-cbSep1.grid(row = 0, column = 0, padx = 5)
+cbSep1.grid(row = 0, column = 0, padx = 4)
 cbSep2.grid(row = 0, column = 1, padx = 4)
 cbSep3.grid(row = 0, column = 2, padx = 4)
 cbSep4.grid(row = 0, column = 3, padx = 4)
 cbSep5.grid(row = 0, column = 4, padx = 4)
-cbSep6.grid(row = 0, column = 5, padx = 5)
+cbSep6.grid(row = 0, column = 5, padx = 4)
 btWordList.grid(row = 3, column = 0, columnspan = 3)
 btGenPW.grid(row = 2, column = 0, columnspan = 3, pady = 5)
 
