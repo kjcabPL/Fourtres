@@ -154,14 +154,20 @@ def genRandomizedHash():
     newPass = "".join(newPass)
     return newPass
 
+# Generate a password using the wordlist and some character separators
 def genRandomizedPhrase():
     global CUR_WORD_LIST
 
     wordLength = CUR_WORD_LENGTH
     tempPass = ""
 
+    separators = ["-", "_", "&", "*", "%", "^"]
+    separators = [char for char in separators if wordSeparators[char].get()]
+
     for i in range(0, wordLength):
         tempPass += choice(CUR_WORD_LIST)
+        if len(separators) and not i == wordLength - 1:
+            tempPass += choice(separators)
 
     newPass = tempPass
     return newPass
@@ -483,7 +489,7 @@ subgrpGenRandom = LabelFrame(groupGens, text = "Character Settings", width = 60,
 subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", padx = 5, pady = 5)
 subgrpGenPhrase = LabelFrame(groupGens, text = "Passphrase Settings", padx = 5, pady = 10)
 subgrpGenSettings = [ subgrpGenRandom, subgrpGenPhrase ]
-subgrpGenSeparators = LabelFrame(subgrpGenPhrase, text = "", padx = 5, pady = 5)
+subgrpGenSeparators = LabelFrame(subgrpGenPhrase, text = "", padx = 5)
 
 # labels
 lblWebsite = Label(groupMain, text="Website:", width = 15 )
@@ -493,7 +499,8 @@ lblGenSource = Label(groupGens, text="Generate Using: ", width = 15)
 lblGenCharSet = Label(subgrpGenRandom, text="Include Characters: ", width = 15)
 lblGenLength = Label(subgrpGenRandom, text="Password Length: ", width = 15)
 lblGenCount = Label(subgrpGenPhrase, text=" Word Count: ", width = 15)
-lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List", width = 16)
+lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List:", width = 16)
+lblGenSeps = Label(subgrpGenPhrase, text="Separate Words Using:")
 
 # Entry Fields
 tbWebsite = Entry(groupMain, width = 50)
@@ -522,12 +529,12 @@ cbSymbols = Checkbutton(subgrpGenCBs, text="Symbols", variable=charSettings["has
 
 # separater checkboxes
 wordSeparators = { "-": BooleanVar(value = False), "_": BooleanVar(value = False), "&": BooleanVar(value = False), "*": BooleanVar(value = False) ,"%": BooleanVar(value = False), "^": BooleanVar(value = False) }
-cbSep1 = Checkbutton(subgrpGenCBs, text="-", variable=charSettings["-"])
-cbSep2 = Checkbutton(subgrpGenCBs, text="_", variable=charSettings["_"])
-cbSep3 = Checkbutton(subgrpGenCBs, text="&", variable=charSettings["&"])
-cbSep4 = Checkbutton(subgrpGenCBs, text="*", variable=charSettings["*"])
-cbSep5 = Checkbutton(subgrpGenCBs, text="%", variable=charSettings["%"])
-cbSep5 = Checkbutton(subgrpGenCBs, text="^", variable=charSettings["^"])
+cbSep1 = Checkbutton(subgrpGenSeparators, text="-", variable=wordSeparators["-"])
+cbSep2 = Checkbutton(subgrpGenSeparators, text="_", variable=wordSeparators["_"])
+cbSep3 = Checkbutton(subgrpGenSeparators, text="&", variable=wordSeparators["&"])
+cbSep4 = Checkbutton(subgrpGenSeparators, text="*", variable=wordSeparators["*"])
+cbSep5 = Checkbutton(subgrpGenSeparators, text="%", variable=wordSeparators["%"])
+cbSep6 = Checkbutton(subgrpGenSeparators, text="^", variable=wordSeparators["^"])
 
 sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = "readonly", validatecommand = validateNumberEntries)
 sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 44, state = "readonly", validatecommand = validateNumberEntries)
@@ -579,7 +586,15 @@ tbWordToAdd.grid(row = 0, column = 1)
 btAddWord.grid(row = 0, column = 2, padx = 5, pady = 5)
 lblGenCount.grid(row = 1, column = 0)
 sbWordCount.grid(row = 1, column = 1, columnspan = 2, pady = 5)
-btWordList.grid(row = 2, column = 0, columnspan = 3)
+lblGenSeps.grid(row = 2, column = 0, pady = 5)
+subgrpGenSeparators.grid(row = 2, column = 1, columnspan = 2, pady = 5)
+cbSep1.grid(row = 0, column = 0, padx = 5)
+cbSep2.grid(row = 0, column = 1, padx = 4)
+cbSep3.grid(row = 0, column = 2, padx = 4)
+cbSep4.grid(row = 0, column = 3, padx = 4)
+cbSep5.grid(row = 0, column = 4, padx = 4)
+cbSep6.grid(row = 0, column = 5, padx = 5)
+btWordList.grid(row = 3, column = 0, columnspan = 3)
 btGenPW.grid(row = 2, column = 0, columnspan = 3, pady = 5)
 
 groupRecords.grid(row = 4, column = 0, columnspan = 3)
