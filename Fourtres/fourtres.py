@@ -360,6 +360,27 @@ def openWordList():
         for item in wordlist:
             lbWordlist.insert(wordlist.index(item), item)
 
+    def removeWordFromList():
+        try:
+            wordToRemove = lbWordlist.get(lbWordlist.curselection())
+        except tkinter.TclError:
+            print("Unable to delete - no word selected")
+        else:
+            index = 0
+            if wordToRemove in wordlist:
+                index = wordlist.index(wordToRemove)
+                lbWordlist.delete(index)
+                wordlist.remove(wordToRemove)
+                newData = {"words": wordlist}
+                try:
+                    with open(WORDFILE, "w") as file:
+                        json.dump(newData, file, indent=2)
+                except FileNotFoundError:
+                    messagebox.showerror("Error updating word list", "Unable to update word list: file not found")
+                    return
+
+    btRemoveWord["command"] = removeWordFromList
+
     # position the components
     lbWordlist.grid(row = 0, column = 0, pady = 5)
     btRemoveWord.grid(row = 1, column = 0, pady = 5)
@@ -462,6 +483,7 @@ subgrpGenRandom = LabelFrame(groupGens, text = "Character Settings", width = 60,
 subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", padx = 5, pady = 5)
 subgrpGenPhrase = LabelFrame(groupGens, text = "Passphrase Settings", padx = 5, pady = 10)
 subgrpGenSettings = [ subgrpGenRandom, subgrpGenPhrase ]
+subgrpGenSeparators = LabelFrame(subgrpGenPhrase, text = "", padx = 5, pady = 5)
 
 # labels
 lblWebsite = Label(groupMain, text="Website:", width = 15 )
@@ -498,6 +520,15 @@ cbChars = Checkbutton(subgrpGenCBs, text="Letters", variable=charSettings["hasLe
 cbNumbers = Checkbutton(subgrpGenCBs, text="Numbers", variable=charSettings["hasNumbers"])
 cbSymbols = Checkbutton(subgrpGenCBs, text="Symbols", variable=charSettings["hasSymbols"])
 
+# separater checkboxes
+wordSeparators = { "-": BooleanVar(value = False), "_": BooleanVar(value = False), "&": BooleanVar(value = False), "*": BooleanVar(value = False) ,"%": BooleanVar(value = False), "^": BooleanVar(value = False) }
+cbSep1 = Checkbutton(subgrpGenCBs, text="-", variable=charSettings["-"])
+cbSep2 = Checkbutton(subgrpGenCBs, text="_", variable=charSettings["_"])
+cbSep3 = Checkbutton(subgrpGenCBs, text="&", variable=charSettings["&"])
+cbSep4 = Checkbutton(subgrpGenCBs, text="*", variable=charSettings["*"])
+cbSep5 = Checkbutton(subgrpGenCBs, text="%", variable=charSettings["%"])
+cbSep5 = Checkbutton(subgrpGenCBs, text="^", variable=charSettings["^"])
+
 sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = "readonly", validatecommand = validateNumberEntries)
 sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 44, state = "readonly", validatecommand = validateNumberEntries)
 
@@ -510,7 +541,6 @@ btAdd["command"] = savePWData
 btSearch["command"] = searchPWData
 btAddWord["command"] = addToWordList
 btWordList["command"] = openWordList
-
 
 # event binding assignments
 listUsers.bind("<<ComboboxSelected>>", displayPWData)
