@@ -1,10 +1,9 @@
 import tkinter
-from json import JSONDecodeError
-from tkinter.ttk import Combobox
-
-
 import pyperclip
 import json
+import os
+from json import JSONDecodeError
+from tkinter.ttk import Combobox
 from math import ceil
 from tkinter import *
 from tkinter import messagebox
@@ -16,8 +15,9 @@ GEN_PW = ""
 GEN_MAX_CTR = 100
 GEN_CALC = False
 
-STOREFILE = "./str/stores.json"
-WORDFILE = "./str/ws.json"
+STOREPATH = "./str"
+STOREFILE = STOREPATH + "/stores.json"
+WORDFILE = STOREPATH + "/ws.json"
 STORED_DATA = {}
 CUR_USER_DATA = []
 CUR_WORD_LIST = []
@@ -177,10 +177,12 @@ def genRandomizedPhrase():
 
 # ---------------------------- PASSWORD FUNCTIONS ------------------------------- #
 def writeNewStoreFile():
+    os.makedirs(STOREPATH, exist_ok=True)
     with open(STOREFILE, mode="w") as file:
         file.write("")
 
 def writeNewWordsetFile():
+    os.makedirs(STOREPATH, exist_ok=True)
     with open(WORDFILE, mode="w") as file:
         file.write("")
 
