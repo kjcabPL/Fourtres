@@ -2,12 +2,14 @@ import tkinter
 from json import JSONDecodeError
 from tkinter.ttk import Combobox
 
+
 import pyperclip
 import json
 from math import ceil
 from tkinter import *
 from tkinter import messagebox
 from random import randint, choice, shuffle
+from datetime import datetime
 
 IS_OPEN = True
 GEN_PW = ""
@@ -298,10 +300,10 @@ def searchPWData():
                     CUR_USER_DATA.append({ "user": username, "pw": pw })
 
     finally:
-        listUsers["values"] = tuple(userlist)
-        listUsers.set("")
+        tbUser["values"] = tuple(userlist)
+        tbUser.set("")
         if len(userlist) > 0:
-            listUsers.set(userlist[0])
+            tbUser.set(userlist[0])
 
 
 # ---------------------------- UI FUNCTIONS ------------------------------- #
@@ -345,9 +347,7 @@ def openWordList():
     geoString = f"{mWidth}x{mHeight}+{posx}+{posy}"
     modalWordlist.geometry(geoString)
 
-    # TODO Check for word list file and grab array from it
     wordlist = []
-
     try:
         with open(WORDFILE, "r") as file:
             data = json.load(file)
@@ -432,7 +432,7 @@ def addToWordList():
 # When the searchbox is changed to a different user
 def displayPWData(event):
     global CUR_USER_DATA
-    curUser = listUsers.get()
+    curUser = tbUser.get()
     data = [ item["pw"] for item in CUR_USER_DATA if item["user"] == curUser ]
     if len(data) > 0:
         tbUser.delete(0, tkinter.END)
@@ -470,7 +470,7 @@ def validateNumberEntries(val):
 
 main = Tk()
 main.config(padx=25, pady=25)
-main.title("Fourtres Password Builder")
+main.title("Fourtres PK")
 main.resizable(False, False)
 
 readPWData()
@@ -484,7 +484,6 @@ canvas.create_image(100, 100, image=lock_img )
 # Panels and component groupings
 groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
 groupGens = LabelFrame(text = "Password Generation", padx = 10, pady = 10)
-groupRecords = LabelFrame(text = "Record Search", padx = 10, pady = 10)
 subgrpGenRandom = LabelFrame(groupGens, text = "Character Settings", width = 60, padx = 5, pady = 10)
 subgrpGenCBs = LabelFrame(subgrpGenRandom, text = "", padx = 5, pady = 5)
 subgrpGenPhrase = LabelFrame(groupGens, text = "Passphrase Settings", padx = 5, pady = 10)
@@ -502,25 +501,27 @@ lblGenCount = Label(subgrpGenPhrase, text=" Word Count: ", width = 15)
 lblGenPhrases = Label(subgrpGenPhrase, text="Edit Word List:", width = 16)
 lblGenSeps = Label(subgrpGenPhrase, text="Separate Words Using:")
 
+# copyright label
+year = str(datetime.now().year)
+lblFooter = Label(text=f"Bitknvs Studio © {year}", font=("Arial", 8, "normal"))
+
 # Entry Fields
-tbWebsite = Entry(groupMain, width = 50)
+tbWebsite = Entry(groupMain, width = 27)
 tbWebsite.insert(0, placeholderWS)
-tbUser = Entry(groupMain, width = 50)
+tbUser = Combobox(groupMain, values=[], width = 47, height = 10)
 tbUser.insert(0, placeholderUser)
 tbNewPw = Entry(groupMain, width = 50)
 tbWordToAdd = Entry(subgrpGenPhrase, width = 20)
 
 # buttons & other components
 btAdd = Button(groupMain, text = "Add Record", width = 60, pady = 5)
+btSearch = Button(groupMain, text = "Search Website 🔎", width = 17)
 btGenPW = Button(groupGens, text = "Generate Password", width = 60, pady = 5)
-btSearch = Button(groupRecords, text = "Search For Website Records 🔎", width = 29, pady = 5)
 btAddWord = Button(subgrpGenPhrase, text = "Add To Word List", width = 20)
 btWordList = Button(subgrpGenPhrase, text = "Open Word List", width = 55, pady = 3)
 
 listGenSource = Combobox(groupGens, values=[val for val in pwGenSources.keys()], state = "readonly", width = 50 )
 listGenSource.set("Random Characters")
-listUsers = Combobox(groupRecords, values=[], width = 30, height = 10, state = "readonly")
-listUsers.set("")
 
 charSettings = {"hasLetters": BooleanVar(value=True), "hasNumbers": BooleanVar(value=True), "hasSymbols": BooleanVar(value=True)}
 cbChars = Checkbutton(subgrpGenCBs, text="Letters", variable=charSettings["hasLetters"])
@@ -550,7 +551,7 @@ btAddWord["command"] = addToWordList
 btWordList["command"] = openWordList
 
 # event binding assignments
-listUsers.bind("<<ComboboxSelected>>", displayPWData)
+tbUser.bind("<<ComboboxSelected>>", displayPWData)
 listGenSource.bind("<<ComboboxSelected>>", changePWGenSource)
 tbUser.bind("<FocusIn>", entryFocused)
 tbUser.bind("<FocusOut>", entryLeaveFocus)
@@ -563,10 +564,11 @@ canvas.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
 groupMain.grid(row = 2, column = 0, columnspan = 3)
 lblWebsite.grid(row = 0, column = 0)
 lblUser.grid(row = 1, column = 0)
-tbWebsite.grid(row = 0, column = 1, columnspan = 2)
-tbUser.grid(row = 1, column = 1, columnspan = 2)
+tbWebsite.grid(row = 0, column = 1, pady = 5)
+btSearch.grid(row = 0, column = 2)
+tbUser.grid(row = 1, column = 1, columnspan = 2, pady = 5)
 lblNewPW.grid(row = 2, column = 0)
-tbNewPw.grid(row = 2, column = 1, columnspan = 2)
+tbNewPw.grid(row = 2, column = 1, columnspan = 2, pady = 5)
 btAdd.grid(row = 3, column = 0, columnspan = 3, pady = 5)
 
 groupGens.grid(row = 3, column = 0, columnspan = 3)
@@ -597,9 +599,8 @@ cbSep6.grid(row = 0, column = 5, padx = 5)
 btWordList.grid(row = 3, column = 0, columnspan = 3)
 btGenPW.grid(row = 2, column = 0, columnspan = 3, pady = 5)
 
-groupRecords.grid(row = 4, column = 0, columnspan = 3)
-btSearch.grid(row = 0, column = 0, columnspan = 2, padx = 5)
-listUsers.grid(row = 0, column = 2, padx = 5)
+# footer placement
+lblFooter.grid(row = 4, column = 0, columnspan = 3, padx = 3)
 
 # hide by default at app start
 subgrpGenPhrase.grid_remove()
