@@ -15,9 +15,11 @@ GEN_PW = ""
 GEN_MAX_CTR = 100
 GEN_CALC = False
 
+IMGPATH = "./img"
 STOREPATH = "./str"
 STOREFILE = STOREPATH + "/stores.json"
 WORDFILE = STOREPATH + "/ws.json"
+LOGO_GIF = IMGPATH + "/Logo.gif"
 STORED_DATA = {}
 CUR_USER_DATA = []
 CUR_WORD_LIST = []
@@ -26,8 +28,7 @@ PW_LENGTH = 20
 
 # Variables for Color Manipulation during PW generation
 CUR_BG = ""
-canvasbgStart = "#FF0000"
-canvasbgGen = "#FFF088"
+LOGO_FRAMES = ""
 pwGenSources = { "Random Characters": 0, "Pass Phrase": 1}
 curGenSource = pwGenSources["Random Characters"]
 startColor = (255, 0, 0)
@@ -47,6 +48,8 @@ def genPassword():
     GEN_CALC = True
     CUR_BG = startColor
 
+    # reset the logo before animating
+    lblLogo.config(image=LOGO_FRAMES[0])
     if curGenSource == 0: generateFromCharacters()
     elif curGenSource == 1: generateFromWordList()
 
@@ -55,7 +58,6 @@ def generateFromCharacters():
 
     GEN_CUR_CTR = 0
     disableButtons()
-    canvas.config(bg=canvasbgStart)
     doGenAnimation(GEN_CUR_CTR)
     tbNewPw.insert(0, str(GEN_PW))
 
@@ -80,7 +82,6 @@ def generateFromWordList():
     CUR_WORD_LENGTH = int(sbWordCount.get())
     GEN_CUR_CTR = 0
     disableButtons()
-    canvas.config(bg=canvasbgStart)
     doGenAnimation(GEN_CUR_CTR)
     tbNewPw.insert(0, str(GEN_PW))
 
@@ -97,15 +98,22 @@ def doGenAnimation(CTR):
             elif curGenSource == 1: newPass = genRandomizedPhrase()
             tbNewPw.delete(0, tkinter.END)
             tbNewPw.insert(0, newPass)
-            CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
-            bgColor = f"#{CUR_BG[0]:02X}{CUR_BG[1]:02X}{CUR_BG[2]:02X}"
-            canvas.config(bg=bgColor)
+
+            # old canvas animation
+            # CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
+            # bgColor = f"#{CUR_BG[0]:02X}{CUR_BG[1]:02X}{CUR_BG[2]:02X}"
+            # canvas.config(bg=bgColor)
+
+            # label logo animation
+            if CTR < len(LOGO_FRAMES): lblLogo.config(image=LOGO_FRAMES[CTR])
+            else: lblLogo.config(image=LOGO_FRAMES[0])
+
             main.after(10, doGenAnimation, CTR)
         else:
             GEN_CALC = False
+            lblLogo.config(image=LOGO_FRAMES[0])
             pyperclip.copy(tbNewPw.get())
             disableButtons(False)
-            canvas.config(bg=canvasbgGen)
 
 def genRandomizedHash():
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
@@ -173,7 +181,6 @@ def genRandomizedPhrase():
 
     newPass = tempPass
     return newPass
-
 
 # ---------------------------- PASSWORD FUNCTIONS ------------------------------- #
 def writeNewStoreFile():
@@ -468,6 +475,16 @@ def entryLeaveFocus(event):
 def validateNumberEntries(val):
     return val.isdigit()
 
+# set up the logo GIF on the main window
+def setupLogoGif():
+    global LOGO_GIF
+    global LOGO_FRAMES
+
+    # load all frames in the animated GIF
+    # maxFrames = GEN_MAX_CTR
+    maxFrames = 50
+    LOGO_FRAMES = [tkinter.PhotoImage( file = LOGO_GIF, format=f"gif -index {i}") for i in range(maxFrames)]
+
 # ---------------------------- UI & WINDOW SETUP ------------------------------- #
 
 main = Tk()
@@ -476,12 +493,6 @@ main.title("Fourtres PK")
 main.resizable(False, False)
 
 readPWData()
-canvasbg = main["bg"]
-
-lock_img = PhotoImage(file="./img/logo.png")
-canvas = Canvas(width=200, height=200)
-canvas.config(bg=canvasbg)
-canvas.create_image(100, 100, image=lock_img )
 
 # Panels and component groupings
 groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
@@ -542,6 +553,10 @@ cbSep6 = Checkbutton(subgrpGenSeparators, text="^", variable=wordSeparators["^"]
 sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = "readonly", validatecommand = validateNumberEntries)
 sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 38, state = "readonly", validatecommand = validateNumberEntries)
 
+# build the logo
+setupLogoGif()
+lblLogo = Label(image=LOGO_FRAMES[0], bg="black")
+
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
 # function assignments
@@ -561,7 +576,7 @@ tbWebsite.bind("<FocusIn>", entryFocused)
 tbWebsite.bind("<FocusOut>", entryLeaveFocus)
 
 # arrangements
-canvas.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
+lblLogo.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
 
 groupMain.grid(row = 2, column = 0, columnspan = 3)
 lblWebsite.grid(row = 0, column = 0)
