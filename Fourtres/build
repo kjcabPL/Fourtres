@@ -1,7 +1,8 @@
 #!/bin/bash
 
 TARGET="fourtres.py"
-ASSETS="logo.png stores.json"
+ASSETS="./img/logo0.png ./img/logo1.png ./img/logo2.png ./img/logo3.png ./img/logo4.png ./img/logo5.png ./img/logo6.png ./img/logo7.png ./img/logo8.png ./img/logo9.png ./img/icon.ico"
+ICONFILE="./img/icon.ico"
 INCLUDE=""
 
 BUILD_DIR="fourtres.build"
@@ -26,7 +27,7 @@ else
 fi
 
 # Compile the file
-python -m nuitka --standalone --enable-plugin=tk-inter $INCLUDE $TARGET 
+python -m nuitka --standalone --enable-plugin=tk-inter --windows-icon-from-ico=$ICONFILE $INCLUDE $TARGET 
 
 # Cleanup build files
 echo Cleanup build files

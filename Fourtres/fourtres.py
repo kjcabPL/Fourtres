@@ -19,7 +19,7 @@ IMGPATH = "./img"
 STOREPATH = "./str"
 STOREFILE = STOREPATH + "/stores.json"
 WORDFILE = STOREPATH + "/ws.json"
-LOGO_GIF = IMGPATH + "/Logo.gif"
+ICONFILE = IMGPATH + "/icon.ico"
 STORED_DATA = {}
 CUR_USER_DATA = []
 CUR_WORD_LIST = []
@@ -49,7 +49,7 @@ def genPassword():
     CUR_BG = startColor
 
     # reset the logo before animating
-    lblLogo.config(image=LOGO_FRAMES[0])
+    # lblLogo.config(image=LOGO_FRAMES[0])
     if curGenSource == 0: generateFromCharacters()
     elif curGenSource == 1: generateFromWordList()
 
@@ -100,18 +100,16 @@ def doGenAnimation(CTR):
             tbNewPw.insert(0, newPass)
 
             # old canvas animation
-            # CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
-            # bgColor = f"#{CUR_BG[0]:02X}{CUR_BG[1]:02X}{CUR_BG[2]:02X}"
-            # canvas.config(bg=bgColor)
+                # CUR_BG = ( CUR_BG[0] + incs[0], CUR_BG[1] + incs[1], CUR_BG[2] + incs[2] )
+                # bgColor = f"#{CUR_BG[0]:02X}{CUR_BG[1]:02X}{CUR_BG[2]:02X}"
+                # canvas.config(bg=bgColor)
 
-            # label logo animation
-            if CTR < len(LOGO_FRAMES): lblLogo.config(image=LOGO_FRAMES[CTR])
-            else: lblLogo.config(image=LOGO_FRAMES[0])
+            for item in ["n1", "n2", "n3", "n4"]:
+                cvLogo.itemconfig(item, image=choice(LOGO_FRAMES))
 
             main.after(10, doGenAnimation, CTR)
         else:
             GEN_CALC = False
-            lblLogo.config(image=LOGO_FRAMES[0])
             pyperclip.copy(tbNewPw.get())
             disableButtons(False)
 
@@ -477,13 +475,17 @@ def validateNumberEntries(val):
 
 # set up the logo GIF on the main window
 def setupLogoGif():
-    global LOGO_GIF
     global LOGO_FRAMES
 
     # load all frames in the animated GIF
-    # maxFrames = GEN_MAX_CTR
-    maxFrames = 50
-    LOGO_FRAMES = [tkinter.PhotoImage( file = LOGO_GIF, format=f"gif -index {i}") for i in range(maxFrames)]
+    maxFrames = 10
+    LOGO_FRAMES = [tkinter.PhotoImage(file=f"{IMGPATH}/logo{i}.png") for i in range(0, 10)]
+
+    padding = 10
+    cvLogo.create_image(50 + padding, 100, image=LOGO_FRAMES[3], tags="n1")
+    cvLogo.create_image(150 + padding, 100, image=LOGO_FRAMES[3], tags="n2")
+    cvLogo.create_image(250 + padding, 100, image=LOGO_FRAMES[3], tags="n3")
+    cvLogo.create_image(350 + padding, 100, image=LOGO_FRAMES[3], tags="n4")
 
 # ---------------------------- UI & WINDOW SETUP ------------------------------- #
 
@@ -491,6 +493,7 @@ main = Tk()
 main.config(padx=25, pady=25)
 main.title("Fourtres PK")
 main.resizable(False, False)
+main.iconbitmap(ICONFILE)
 
 readPWData()
 
@@ -554,8 +557,8 @@ sbCharLength = Spinbox(subgrpGenRandom, from_ = 8, to = 50, width = 40, state = 
 sbWordCount = Spinbox(subgrpGenPhrase, from_ = 2, to = 10, width = 38, state = "readonly", validatecommand = validateNumberEntries)
 
 # build the logo
+cvLogo = Canvas(width = 415, height = 200, bg="black")
 setupLogoGif()
-lblLogo = Label(image=LOGO_FRAMES[0], bg="black")
 
 # ---------------------------- WINDOW & COMPONENTS SETUP ------------------------------- #
 
@@ -576,7 +579,7 @@ tbWebsite.bind("<FocusIn>", entryFocused)
 tbWebsite.bind("<FocusOut>", entryLeaveFocus)
 
 # arrangements
-lblLogo.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
+cvLogo.grid(row = 0, column = 0, columnspan = 3, rowspan = 2)
 
 groupMain.grid(row = 2, column = 0, columnspan = 3)
 lblWebsite.grid(row = 0, column = 0)
