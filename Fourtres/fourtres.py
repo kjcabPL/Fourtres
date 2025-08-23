@@ -2,6 +2,7 @@ import tkinter
 import pyperclip
 import json
 import os
+import webbrowser
 from json import JSONDecodeError
 from tkinter.ttk import Combobox
 from math import ceil
@@ -315,6 +316,27 @@ def searchPWData():
 
 # ---------------------------- UI FUNCTIONS ------------------------------- #
 
+def aboutFourtres():
+    year = str(datetime.now().year)
+    img = LOGO_FRAMES[3]
+
+    dg = Toplevel(main, padx = "10", pady = "10")
+    dg.title = "About Fourtres"
+    dg.resizable(False, False)
+    dlbli = Label(dg, image = img)
+    dlbl1 = Label(dg, text = "Fourtres Pass Keeper")
+    dlbl2 = Label(dg, text = "Ver. 1.0")
+    dlbl3 = Label(dg, text = f"Bitknvs Studio © {year}")
+    dlbl4 = Label(dg, text = "http:/bitknvs.com", fg = "blue", cursor = "hand2")
+    dlbl4.bind("<Button-1>", lambda e: webbrowser.open("http:/bitknvs.com"))
+
+    dlbli.grid(row = 0, column = 0, rowspan = 4, padx = 10)
+    dlbl1.grid(row = 0, column = 1, padx = 30)
+    dlbl2.grid(row = 1, column = 1, padx = 30)
+    dlbl3.grid(row = 2, column = 1, padx = 30)
+    dlbl4.grid(row = 3, column = 1, padx = 30)
+
+
 def closeWindow():
     global IS_OPEN
     if messagebox.askokcancel("Exit", "Exit Fourtres?"):
@@ -494,8 +516,15 @@ main.config(padx=25, pady=25)
 main.title("Fourtres PK")
 main.resizable(False, False)
 main.iconbitmap(ICONFILE)
-
 readPWData()
+
+# Menubar and help button
+menuMain = Menu(main)
+main.config(menu=menuMain)
+
+menuhelp = Menu(menuMain, tearoff = 0)
+menuMain.add_cascade(label = "Help", menu = menuhelp)
+menuhelp.add(label = "About Fourtres", itemType = "command", command = aboutFourtres)
 
 # Panels and component groupings
 groupMain = LabelFrame(text = "User Record", padx = 10, pady = 10)
