@@ -11,6 +11,7 @@ from tkinter import messagebox
 from random import randint, choice, shuffle
 from datetime import datetime
 
+VERSION = "1.0.0"
 IS_OPEN = True
 GEN_PW = ""
 GEN_MAX_CTR = 100
@@ -21,6 +22,7 @@ STOREPATH = "./str"
 STOREFILE = STOREPATH + "/stores.json"
 WORDFILE = STOREPATH + "/ws.json"
 ICONFILE = IMGPATH + "/icon.ico"
+LOGOFILE = IMGPATH + "/logo.png"
 STORED_DATA = {}
 CUR_USER_DATA = []
 CUR_WORD_LIST = []
@@ -318,14 +320,15 @@ def searchPWData():
 
 def aboutFourtres():
     year = str(datetime.now().year)
-    img = LOGO_FRAMES[3]
+    img = tkinter.PhotoImage(file = f"{IMGPATH}/logo.png")
 
     dg = Toplevel(main, padx = "10", pady = "10")
     dg.title = "About Fourtres"
     dg.resizable(False, False)
     dlbli = Label(dg, image = img)
+    dlbli.img = img
     dlbl1 = Label(dg, text = "Fourtres Pass Keeper")
-    dlbl2 = Label(dg, text = "Ver. 1.0")
+    dlbl2 = Label(dg, text = f"{VERSION}")
     dlbl3 = Label(dg, text = f"Bitknvs Studio © {year}")
     dlbl4 = Label(dg, text = "http:/bitknvs.com", fg = "blue", cursor = "hand2")
     dlbl4.bind("<Button-1>", lambda e: webbrowser.open("http:/bitknvs.com"))
